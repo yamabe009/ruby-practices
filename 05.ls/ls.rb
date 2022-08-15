@@ -7,6 +7,7 @@ require 'etc'
 
 COLUMN_COUNT = 3
 COLUMN_MARGIN = 4
+CURRENT_DIR = '.'
 
 FILE_TYPE = {
   'file' => '-',
@@ -31,12 +32,12 @@ def main
   opt.on('-a') { |v| options[:a] = v }
   opt.on('-r') { |v| options[:r] = v }
   opt.on('-l') { |v| options[:l] = v }
-  path = opt.parse(ARGV)[0]
+  path = opt.parse(ARGV)[0] || CURRENT_DIR
 
   puts ls(options, path)
 end
 
-def ls(options, path = '.')
+def ls(options, path = CURRENT_DIR)
   files = get_files(options, path)
   return '' if files.empty?
 
@@ -74,7 +75,7 @@ def get_long_data(files, path)
   long_data = []
   files.each do |filename|
     data = {}
-    filepath = "#{path}/#{filename}"
+    filepath = get_filepath(path, filename)
     fs = if File.ftype(filepath) == 'link'
            File.lstat(filepath)
          else
@@ -98,6 +99,14 @@ def get_long_data(files, path)
     long_data << data
   end
   long_data
+end
+
+def get_filepath(path, filename)
+  if path == CURRENT_DIR
+    filename
+  else
+    "#{path}/#{filename}"
+  end
 end
 
 def format_long(long_data)
