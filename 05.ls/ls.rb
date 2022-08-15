@@ -76,18 +76,9 @@ def get_long_data(files, path)
   files.each do |filename|
     data = {}
     filepath = get_filepath(path, filename)
-    fs = if File.ftype(filepath) == 'link'
-           File.lstat(filepath)
-         else
-           File::Stat.new(filepath)
-         end
+    fs = get_file_stat(filepath)
     data[:filetype] = FILE_TYPE[fs.ftype]
-    mode = fs.mode.to_s(8)
-    permission = ''
-    (-3..-1).each do |index|
-      permission += FILE_PERMISSION[mode[index]]
-    end
-    data[:permission] = permission
+    data[:permission] = get_permission(fs)
     data[:link] = fs.nlink
     data[:owner_name] = Etc.getpwuid(File.stat(filepath).uid).name
     data[:group_name] = Etc.getgrgid(File.stat(filepath).gid).name
@@ -107,6 +98,23 @@ def get_filepath(path, filename)
   else
     "#{path}/#{filename}"
   end
+end
+
+def get_file_stat(filepath)
+  if File.ftype(filepath) == 'link'
+    File.lstat(filepath)
+  else
+    File::Stat.new(filepath)
+  end
+end
+
+def get_permission(file_stat)
+  mode = file_stat.mode.to_s(8)
+  permission = ''
+  (-3..-1).each do |index|
+    permission += FILE_PERMISSION[mode[index]]
+  end
+  permission
 end
 
 def format_long(long_data)
