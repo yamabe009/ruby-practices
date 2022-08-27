@@ -45,7 +45,7 @@ end
 def total(options, wc_data)
   result = {}
   options.each_key do |key|
-    result[key] = wc_data.sum { |data| data[key] } unless key == :content
+    result[key] = wc_data.sum { |data| data[key] } if options[key] && key != :content
   end
   result[:content] = 'total'
   result
