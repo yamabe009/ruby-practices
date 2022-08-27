@@ -17,9 +17,9 @@ def main
   opt.on('-l') { |v| options[:l] = v }
   opt.on('-w') { |v| options[:w] = v }
   opt.on('-c') { |v| options[:c] = v }
-  options = FULL_OPTIONS if options.empty?
-
   files = opt.parse(ARGV)
+
+  options = FULL_OPTIONS if options.empty?
   wc_data = files.empty? ? [wc_text(options, $stdin.read)] : wc_files(options, files)
   puts format(options, wc_data)
 end
