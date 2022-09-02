@@ -20,42 +20,42 @@ def main
   files = opt.parse(ARGV)
 
   options = FULL_OPTIONS if options.empty?
-  wc_data = files.empty? ? [wc_text(options, $stdin.read)] : wc_files(options, files)
-  puts format(options, wc_data)
+  rows = files.empty? ? [calc_text(options, $stdin.read)] : calc_files(options, files)
+  puts format(options, rows)
 end
 
-def wc_files(options, files)
+def calc_files(options, files)
   result = files.map do |filepath|
     text = File.open(filepath).read
-    wc_text(options, text, content: filepath)
+    calc_text(options, text, title: filepath)
   end
   result.push total(options, result) if files.count > 1
   result
 end
 
-def wc_text(options, text, content: '')
+def calc_text(options, text, title: '')
   result = {}
   result[:l] = text.count("\n") if options[:l]
   result[:w] = text.split("\s").count if options[:w]
   result[:c] = text.bytesize if options[:c]
-  result[:content] = content
+  result[:title] = title
   result
 end
 
-def total(options, wc_data)
+def total(options, rows)
   result = {}
   options.each_key do |key|
-    result[key] = wc_data.sum { |data| data[key] } if options[key] && key != :content
+    result[key] = rows.sum { |row| row[key] } if options[key] && key != :title
   end
-  result[:content] = 'total'
+  result[:title] = 'total'
   result
 end
 
-def format(options, wc_data)
-  wc_data.map do |data|
+def format(options, rows)
+  rows.map do |row|
     result = ''
-    options.each_key { |key| result += data[key].to_s.rjust(COLUMN_WIDTH) if options[key] }
-    result += " #{data[:content]}"
+    options.each_key { |key| result += row[key].to_s.rjust(COLUMN_WIDTH) if options[key] }
+    result += " #{row[:title]}"
   end
 end
 
